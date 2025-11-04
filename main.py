@@ -1,5 +1,9 @@
 from tkinter import *
-#testt
+import sqlite3
+
+def test(event, text):
+    print(text.get())
+
 def window_init():
     #draw window
     root=Tk()
@@ -27,6 +31,36 @@ def window_init():
     #)
 
 
+    #keyboard
+    root.bind('<Return>', lambda event: test(event, text_var))
+
     root.mainloop()
 
+class PasswordManagerDB:
+    def __init__(self):
+        self.init_db()
+    def init_db(self):
+        con = sqlite3.connect('passwords.db')
+        cur = con.cursor()
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS passwords (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_name TEXT NOT NULL,
+            username TEXT,
+            password TEXT NOT NULL,
+            url TEXT,
+            notes TEXT,
+            created_at, DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at, DATETIME DEFAULT CURRENT_TIMESTAMP
+        ''')
+        con.commit()
+        con.close()
+    def add_password(self):
+        pass
+    def search_password(self):
+        pass
+    def del_password(self):
+        pass
 window_init()
+db = PasswordManagerDB()
