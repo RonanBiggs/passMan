@@ -37,13 +37,12 @@ def window_init():
     root.mainloop()
 
 class PasswordManagerDB:
+    con = sqlite3.connect('passwords.db')
+    cur = con.cursor()
     def __init__(self):
-        self.init_db()
-    def init_db(self):
-        con = sqlite3.connect('passwords.db')
-        cur = con.cursor()
-
-        cursor.execute('''
+        pass
+    def __enter__(self): #Runs as start of with
+        self.cur.execute('''
             CREATE TABLE IF NOT EXISTS passwords (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             account_name TEXT NOT NULL,
@@ -51,16 +50,28 @@ class PasswordManagerDB:
             password TEXT NOT NULL,
             url TEXT,
             notes TEXT,
-            created_at, DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at, DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP);
         ''')
-        con.commit()
-        con.close()
+        self.con.commit()
+        return self
+    def __exit__(self, exc_type, exc_val, exc_tb): #Runs at end of with
+        if self.cur:
+            self.cur.close()
+        if self.con:
+            self.con.close()
+
     def add_password(self):
-        pass
+        self.cur.execute("INSERT INTO passwords (account_name, username, password, url, notes) VALUES ('google', 'john', 'password123', 'google.com', 'N/A')")
+        self.con.commit()
     def search_password(self):
         pass
     def del_password(self):
         pass
-window_init()
-db = PasswordManagerDB()
+
+
+with PasswordManagerDB() as db:
+    window_init()
+    db.add_password()
+
+
