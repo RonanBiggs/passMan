@@ -2,6 +2,39 @@ import tkinter as tk
 
 
 
+'''
+def window_init():
+    # ====== draw window ======
+    root=Tk()
+    root.title('Tkinter Window - Center')
+    window_width = 300
+    window_height = 200
+    root.geometry(f'{window_width}x{window_height}')
+
+   # ====== buttons ======
+    button = Button(root, text="Add Account", command=lambda : print("cool"))
+    button.pack(ipadx=5, ipady=5, expand=True)
+    #text entry box
+    #box_label = Label(root, text='tmp: ')
+    #box_label.pack(pady=2)
+    #hide pass
+    #entry = Entry(root, show='*')
+    #text_var = StringVar()
+    #entry = Entry(root, textvariable=text_var)
+    #entry.pack(pady=20)
+    #entry.focus()
+    #output text
+    #output_label = Label(root)
+    #output_label.pack()
+    #text_var.trace_add(
+    #    "write",
+    #    lambda *args: output_label.config(text=text_var.get().upper())
+    #)
+    #keyboard
+    #root.bind('<Return>', lambda event: test(event, text_var))
+
+    root.mainloop()
+'''
 LARGE_FONT= ("Verdana", 12)
 class PasswordManagerWindow(tk.Tk):
 
@@ -37,7 +70,7 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text="Start Page", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
-        button = tk.Button(self, text="Visit Page 1",
+        button = tk.Button(self, text="Add Account",
                            command=lambda: controller.show_frame(PageOne))
         button.pack()
 
@@ -45,21 +78,42 @@ class StartPage(tk.Frame):
                             command=lambda: controller.show_frame(PageTwo))
         button2.pack()
 
-
+def test(event, text):
+    print(text.get())
 class PageOne(tk.Frame):
+
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
-        label.pack(pady=10, padx=10)
+        self.grid_columnconfigure((0, 1), weight=1)
+
+
+
+
+        win_label = tk.Label(self, text="Add Account Page", font=LARGE_FONT)
+        acc_label = tk.Label(self, text="Account Name: ", font=LARGE_FONT)
+        #label.pack(pady=10, padx=10)
 
         button1 = tk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
-        button1.pack()
+        #button1.pack()
 
         button2 = tk.Button(self, text="Page Two",
                             command=lambda: controller.show_frame(PageTwo))
-        button2.pack()
+        #button2.pack()
+
+        text_var = tk.StringVar()
+        acc_entry = tk.Entry(self, textvariable=text_var)
+        #acc_entry.pack(pady=20)
+        acc_entry.focus()
+        # keyboard
+        acc_entry.bind('<Return>', lambda event: test(event, text_var))
+
+        win_label.grid(row = 0, column = 0)
+        button1.grid(row = 1, column = 1)
+        button2.grid(row=2, column=1)
+        acc_entry.grid(row = 3, column = 1)
+        acc_label.grid(row = 3, column = 0)
 
 
 class PageTwo(tk.Frame):
