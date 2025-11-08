@@ -2,76 +2,24 @@ from tkinter import *
 import sqlite3
 import tkinter as tk
 from PasswordManagerWindow import *
+from server import *
 
 
 
 
-class PasswordManagerDB:
-    con = sqlite3.connect('passwords.db')
-    cur = con.cursor()
-    def __init__(self):
-        pass
-    def __enter__(self): #Runs as start of with
-        self.cur.execute('''
-            CREATE TABLE IF NOT EXISTS passwords (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            account_name TEXT NOT NULL,
-            username TEXT,
-            password TEXT NOT NULL,
-            url TEXT,
-            notes TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP);
-        ''')
-        self.con.commit()
-        return self
-    def __exit__(self, exc_type, exc_val, exc_tb): #Runs at end of with
-        if self.cur:
-            self.cur.close()
-        if self.con:
-            self.con.close()
-
-    def add_password(self, account_name=None, username=None, password=None, url=None, notes=None):
-        self.cur.execute("INSERT INTO passwords (account_name, username, password, url, notes) VALUES ('%s', '%s', '%s', '%s', '%s')"%(account_name, username, password, url, notes))
-        self.con.commit()
-
-    def update_password(self, account_name=None, username=None, password=None, url=None, notes=None):
-        if account_name is None:
-            raise ValueError("No Such Account")
-
-        updates = []
-        params = []
-        fields = [
-            ('username', username),
-            ('password', password),
-            ('url', url),
-            ('notes', notes)
-        ]
-
-        for column, value in fields:
-            if value is not None:
-                updates.append(f"{column} = ?")
-                params.append(value)
-
-        if updates is None:
-            raise ValueError("No New Changes")
-
-        params.append(account_name)
-        sql = f"UPDATE passwords SET {', '.join(updates)} WHERE account_name = ?"
-        self.cur.execute(sql, params)
-        self.con.commit()
-
-
-    def search_password(self):
-        self.cur.execute("SELECT * FROM passwords WHERE account_name = 'google'")
-        output = self.cur.fetchall()
-        print(output)
-
-    def del_password(self, account_name):
-        sql = 'DELETE FROM passwords WHERE account_name = ?'
-        self.cur.execute(sql, (account_name,))
-        self.con.commit()
-
-with PasswordManagerDB() as db:
-    app = PasswordManagerWindow()
-    app.mainloop()
+class Client:
+    def __init__(self, host='localhost', port=5432):
+        self.host = host
+        self.port = port
+        self.socket = None
+    def connect(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((self.host, self.port))
+        greeting = self.socket.recv(1024).decode().strip()
+        print(f"Server greeting: {greeting}")
+#with PasswordManagerDB() as db:
+if __name__ == "__main__":
+#    app = PasswordManagerWindow()
+#    app.mainloop()
+    client = Client('localhost', 5432)
+    client.connect()

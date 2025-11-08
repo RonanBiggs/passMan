@@ -89,31 +89,55 @@ class PageOne(tk.Frame):
 
 
 
-
+        #TEXT INPUT VARIABLES
+        acc_name_txt = tk.StringVar()
+        username_txt = tk.StringVar()
+        password_txt = tk.StringVar()
+        url_txt = tk.StringVar()
+        notes_txt = tk.StringVar()
+        #LABELS
         win_label = tk.Label(self, text="Add Account Page", font=LARGE_FONT)
         acc_label = tk.Label(self, text="Account Name: ", font=LARGE_FONT)
-        #label.pack(pady=10, padx=10)
-
+        user_label = tk.Label(self, text="Username: ", font=LARGE_FONT)
+        pass_label = tk.Label(self, text="Password: ", font=LARGE_FONT)
+        url_label = tk.Label(self, text="URL: ", font=LARGE_FONT)
+        notes_label = tk.Label(self, text="Notes: ", font=LARGE_FONT)
+        #BUTTON
         button1 = tk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
-        #button1.pack()
-
         button2 = tk.Button(self, text="Page Two",
                             command=lambda: controller.show_frame(PageTwo))
-        #button2.pack()
-
-        text_var = tk.StringVar()
-        acc_entry = tk.Entry(self, textvariable=text_var)
-        #acc_entry.pack(pady=20)
+        #TEXT ENTRIESK
+        acc_entry = tk.Entry(self, textvariable=acc_name_txt)
+        user_entry = tk.Entry(self, textvariable=username_txt)
+        pass_entry = tk.Entry(self, textvariable=password_txt)
+        url_entry = tk.Entry(self, textvariable=url_txt)
+        notes_entry = tk.Entry(self, textvariable=notes_txt)
+        #FOCUS ON ACC NAME
         acc_entry.focus()
-        # keyboard
-        acc_entry.bind('<Return>', lambda event: test(event, text_var))
 
+        #KEYBOARD BINDS
+        acc_entry.bind('<Return>', lambda event: test(event, acc_name_txt))
+        user_entry.bind('<Return>', lambda event: test(event, username_txt))
+        pass_entry.bind('<Return>', lambda event: test(event, password_txt))
+        url_entry.bind('<Return>', lambda event: test(event, url_txt))
+        notes_entry.bind('<Return>', lambda event: test(event, notes_txt))
+
+        #ARRANGE ON SCREEN
         win_label.grid(row = 0, column = 0)
+        acc_label.grid(row = 3, column = 0)
+        user_label.grid(row = 4, column = 0)
+        pass_label.grid(row = 5, column = 0)
+        url_label.grid(row = 6, column = 0)
+        notes_label.grid(row = 7, column = 0)
         button1.grid(row = 1, column = 1)
         button2.grid(row=2, column=1)
         acc_entry.grid(row = 3, column = 1)
-        acc_label.grid(row = 3, column = 0)
+        user_entry.grid(row = 4, column = 1)
+        pass_entry.grid(row = 5, column = 1)
+        url_entry.grid(row = 6, column = 1)
+        notes_entry.grid(row = 7, column = 1)
+
 
 
 class PageTwo(tk.Frame):
