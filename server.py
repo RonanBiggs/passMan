@@ -3,8 +3,14 @@ import json
 import socket
 
 #TODO: Extending passwordManagerDB to also be the server
+#TODO: handle handshake and database requests
 class PasswordManagerDB:
     #init server
+    greeting = {
+        "version": "1.0",
+        "server": "passmanServer/1.0",
+        "status": "ready"
+    }
     def __init__(self, db='passwords.db', host='localhost', port=5432):
         self.con = sqlite3.connect(db)
         self.cur = self.con.cursor()
@@ -41,18 +47,35 @@ class PasswordManagerDB:
 
         while self.running:
             client_socket, addr = s.accept()
-            print(f"connection from {addr}")
-            try:
-                greeting = {
-                    "version": "1.0",
-                    "server": "passmanServer/1.0",
-                    "status": "ready"
-                }
-                client_socket.send(json.dumps(greeting).encode() + b'\n')
-            except Exception as e:
-                print(f"Server Error: {e}")
-            finally:
-                client_socket.close()
+            with client_socket:
+                print(f"connection from {addr}")
+                client_socket.send(json.dumps(self.greeting).encode() + b'\n')
+                while True:
+                    response = client_socket.recv(1024)
+                    switch = {
+                        b'send_all\n' : lambda : self.send_all_response(client_socket),
+                        b'other\n' : lambda : client_socket.sendall(response)
+                    }
+                    print(f"response: {response}")#.decode().strip()
+                    switch.get(response, lambda: print("unknown"))()
+                    client_socket.sendall(response)
+
+    #RESPONSE FUNCTIONS
+
+    #sendall response - servers action taken when sendall command is received (submitting all fields)
+    def send_all_response(self, client_socket):
+        client_socket.sendall("send_all: OKAY".encode())
+        #self.add_password(self, an, u, p, url, notes)
+        response = client_socket.recv(1024)
+        parsed_data = json.loads(response.decode('utf-8'))
+        acc_name = parsed_data['acc_name']
+        username = parsed_data['username']
+        password = parsed_data['password']
+        url = parsed_data['url']
+        notes = parsed_data['notes']
+        self.add_password(acc_name, username, password, url, notes)
+        print(f"sarr: {response}")
+
     #DATABASE FUNCTIONS
     def add_password(self, account_name=None, username=None, password=None, url=None, notes=None):
         self.cur.execute("INSERT INTO passwords (account_name, username, password, url, notes) VALUES ('%s', '%s', '%s', '%s', '%s')"%(account_name, username, password, url, notes))
