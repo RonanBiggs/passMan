@@ -1,6 +1,7 @@
 import sqlite3
 import json
 import socket
+from diffieHellman import *
 
 #TODO: Extending passwordManagerDB to also be the server
 #TODO: handle handshake and database requests
@@ -47,9 +48,24 @@ class PasswordManagerDB:
 
         while self.running:
             client_socket, addr = s.accept()
+            #TODO: multithreading
             with client_socket:
                 print(f"connection from {addr}")
                 client_socket.send(json.dumps(self.greeting).encode() + b'\n')
+                #Incoming Connection: initiate DH
+                server_dh = DiffieHellmanParty()
+                #gen public/private key
+                server_dh.gen_keys()
+                #send server public key
+                client_socket.send(str(server_dh.public_key).encode() + b'\n')
+                #recieve client public key
+                client_public_key = client_socket.recv(1024)
+                client_public_key = int(client_public_key.split(b'\n')[0])
+                #gen shared key
+                shared_key = server_dh.compute_shared_secret(client_public_key)
+                #gen aes key
+                server_dh.get_aes_key()
+                client_socket.send(server_dh.encrypt("cipher text from server", server_dh.iv))
                 while True:
                     response = client_socket.recv(1024)
                     switch = {
