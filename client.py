@@ -42,6 +42,8 @@ class Client:
 #send an encrypted message to the server
     def send(self, data):
        self.socket.send(self.client_dh.encrypt(data, self.client_dh.iv))
+    def recv(self):
+        return self.client_dh.decrypt(self.socket.recv(1024), self.client_dh.iv)
 
 #temporary test function
     def send_hello(self, event, text):
@@ -52,7 +54,7 @@ class Client:
     def add_password(self, acc_name, username, password, url, notes):
 #        self.socket.send("add_password".encode() + b'\n')
         self.send("add_password")
-        response = self.socket.recv(1024)
+        response = self.recv()
         print(response)
         data = {
             "acc_name" : acc_name.get(),
@@ -68,6 +70,12 @@ class Client:
         print(response)
 #send account name, expect all data back.
     def search_password(self, acc_name):
-        pass
+        self.send("search_password")
+        response = self.recv()
+        print(response)
+        self.send(acc_name)
+        response = self.recv()
+        print(response)
+
     def exit(self):
         self.socket.close()

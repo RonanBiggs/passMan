@@ -38,7 +38,10 @@ class PasswordManagerDB:
             self.cur.close()
         if self.con:
             self.con.close()
-
+    def send(self, client_socket, data):
+        client_socket.send(self.server_dh.encrypt(data, self.server_dh.iv))
+    def recv(self, client_socket):
+        return self.server_dh.decrypt(client_socket.recv(1024), self.server_dh.iv)
     #SERVER FUNCTIONS
     def start(self):
         self.running = True
@@ -74,6 +77,7 @@ class PasswordManagerDB:
                         break
                     switch = {
                         'add_password' : lambda : self.add_password_response(client_socket),
+                        'search_password' : lambda : self.search_password_response(client_socket),
                         'other' : lambda : client_socket.sendall(response)
                     }
                     print(f"response: {response}")#.decode().strip()
@@ -84,7 +88,7 @@ class PasswordManagerDB:
 
     #sendall response - servers action taken when sendall command is received (submitting all fields)
     def add_password_response(self, client_socket):
-        client_socket.sendall(self.server_dh.encrypt("send_all: OKAY", self.server_dh.iv))
+        client_socket.sendall(self.server_dh.encrypt("add_password: OKAY", self.server_dh.iv))
         #self.add_password(self, an, u, p, url, notes)
         response = self.server_dh.decrypt(client_socket.recv(1024), self.server_dh.iv)
         parsed_data = json.loads(response)#.decode('utf-8'))
@@ -95,6 +99,12 @@ class PasswordManagerDB:
         notes = parsed_data['notes']
         self.add_password(acc_name, username, password, url, notes)
         print(f"sarr: {response}")
+        
+    def search_password_response(self, client_socket):
+        client_socket.sendall(self.server_dh.encrypt("search_password: OKAY", self.server_dh.iv))
+        response = self.recv(client_socket)
+        data = str(self.search_password(response))
+        self.send(client_socket, data)
 
     #DATABASE FUNCTIONS
     def add_password(self, account_name=None, username=None, password=None, url=None, notes=None):
@@ -128,10 +138,10 @@ class PasswordManagerDB:
         self.con.commit()
 
 
-    def search_password(self):
-        self.cur.execute("SELECT * FROM passwords WHERE account_name = 'google'")
+    def search_password(self, acc_name):
+        self.cur.execute(f"SELECT * FROM passwords WHERE account_name = '{acc_name}'")
         output = self.cur.fetchall()
-        print(output)
+        return output
 
     def del_password(self, account_name):
         sql = 'DELETE FROM passwords WHERE account_name = ?'

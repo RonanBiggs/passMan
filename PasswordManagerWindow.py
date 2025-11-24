@@ -115,10 +115,13 @@ class PageTwo(tk.Frame):
         win_label = tk.Label(self, text="Search", font=LARGE_FONT)
         button1 = tk.Button(self, text="Back",
                             command=lambda: controller.show_frame(StartPage))
+        submit_button = tk.Button(self, text="Submit Entry",
+                                  command=lambda: controller.client.search_password(acc_name_txt.get()))
 
         acc_entry = tk.Entry(self, textvariable=acc_name_txt)
 
 
         win_label.grid(row = 0, column = 2)
         button1.grid(row=0, column=0)
+        submit_button.grid(row=1,column=1)
         acc_entry.grid(row=1,column=2)
