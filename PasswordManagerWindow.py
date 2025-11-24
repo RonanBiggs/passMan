@@ -38,7 +38,7 @@ class StartPage(tk.Frame):
                            command=lambda: controller.show_frame(PageOne))
         button.pack()
 
-        button2 = tk.Button(self, text="Visit Page 2",
+        button2 = tk.Button(self, text="Lookup",
                             command=lambda: controller.show_frame(PageTwo))
         button2.pack()
 
@@ -67,12 +67,12 @@ class PageOne(tk.Frame):
         url_label = tk.Label(self, text="URL: ", font=LARGE_FONT)
         notes_label = tk.Label(self, text="Notes: ", font=LARGE_FONT)
         #BUTTON
-        button1 = tk.Button(self, text="Back to Home",
+        button1 = tk.Button(self, text="Back",
                             command=lambda: controller.show_frame(StartPage))
-        button2 = tk.Button(self, text="Page Two",
-                            command=lambda: controller.show_frame(PageTwo))
+        #button2 = tk.Button(self, text="Page Two",
+        #                    command=lambda: controller.show_frame(PageTwo))
         submit_button = tk.Button(self, text="Submit Entry",
-                            command=lambda: controller.client.send_all(acc_name_txt, username_txt, password_txt, url_txt, notes_txt))
+                            command=lambda: controller.client.add_password(acc_name_txt, username_txt, password_txt, url_txt, notes_txt))
         #TEXT ENTRIES
         acc_entry = tk.Entry(self, textvariable=acc_name_txt)
         user_entry = tk.Entry(self, textvariable=username_txt)
@@ -90,15 +90,15 @@ class PageOne(tk.Frame):
 #        notes_entry.bind('<Return>', lambda event: test(event, notes_txt))
 
         #ARRANGE ON SCREEN
-        win_label.grid(row = 0, column = 0)
+        win_label.grid(row = 0, column = 1)
         acc_label.grid(row = 3, column = 0)
         user_label.grid(row = 4, column = 0)
         pass_label.grid(row = 5, column = 0)
         url_label.grid(row = 6, column = 0)
         notes_label.grid(row = 7, column = 0)
-        button1.grid(row = 1, column = 1)
-        button2.grid(row=2, column=1)
-        submit_button.grid(row=2, column=2)
+        button1.grid(row = 0, column = 0)
+        #button2.grid(row=2, column=1)
+        submit_button.grid(row=1, column=2)
         acc_entry.grid(row = 3, column = 1)
         user_entry.grid(row = 4, column = 1)
         pass_entry.grid(row = 5, column = 1)
@@ -111,13 +111,14 @@ class PageTwo(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Page Two!!!", font=LARGE_FONT)
-        label.pack(pady=10, padx=10)
-
-        button1 = tk.Button(self, text="Back to Home",
+        acc_name_txt = tk.StringVar()
+        win_label = tk.Label(self, text="Search", font=LARGE_FONT)
+        button1 = tk.Button(self, text="Back",
                             command=lambda: controller.show_frame(StartPage))
-        button1.pack()
 
-        button2 = tk.Button(self, text="Page One",
-                            command=lambda: controller.show_frame(PageOne))
-        button2.pack()
+        acc_entry = tk.Entry(self, textvariable=acc_name_txt)
+
+
+        win_label.grid(row = 0, column = 2)
+        button1.grid(row=0, column=0)
+        acc_entry.grid(row=1,column=2)

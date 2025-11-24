@@ -18,6 +18,7 @@ class PasswordManagerDB:
         self.host = host
         self.port = port
         self.running = False
+        self.server_dh = None
     def __enter__(self): #Runs as start of with
         self.cur.execute('''
             CREATE TABLE IF NOT EXISTS passwords (
@@ -53,37 +54,40 @@ class PasswordManagerDB:
                 print(f"connection from {addr}")
                 client_socket.send(json.dumps(self.greeting).encode() + b'\n')
                 #Incoming Connection: initiate DH
-                server_dh = DiffieHellmanParty()
+                self.server_dh = DiffieHellmanParty()
                 #gen public/private key
-                server_dh.gen_keys()
+                self.server_dh.gen_keys()
                 #send server public key
-                client_socket.send(str(server_dh.public_key).encode() + b'\n')
+                client_socket.send(str(self.server_dh.public_key).encode() + b'\n')
                 #recieve client public key
                 client_public_key = client_socket.recv(1024)
                 client_public_key = int(client_public_key.split(b'\n')[0])
                 #gen shared key
-                shared_key = server_dh.compute_shared_secret(client_public_key)
+                shared_key = self.server_dh.compute_shared_secret(client_public_key)
                 #gen aes key
-                server_dh.get_aes_key()
-                client_socket.send(server_dh.encrypt("cipher text from server", server_dh.iv))
+                self.server_dh.get_aes_key()
+                client_socket.send(self.server_dh.encrypt("cipher text from server", self.server_dh.iv))
                 while True:
-                    response = client_socket.recv(1024)
+                    response = self.server_dh.decrypt(client_socket.recv(1024), self.server_dh.iv)
+                    if not response:
+                        print(f"client {addr} disconnected")
+                        break
                     switch = {
-                        b'send_all\n' : lambda : self.send_all_response(client_socket),
-                        b'other\n' : lambda : client_socket.sendall(response)
+                        'add_password' : lambda : self.add_password_response(client_socket),
+                        'other' : lambda : client_socket.sendall(response)
                     }
                     print(f"response: {response}")#.decode().strip()
                     switch.get(response, lambda: print("unknown"))()
-                    client_socket.sendall(response)
+                    client_socket.sendall(self.server_dh.encrypt(response, self.server_dh.iv))
 
     #RESPONSE FUNCTIONS
 
     #sendall response - servers action taken when sendall command is received (submitting all fields)
-    def send_all_response(self, client_socket):
-        client_socket.sendall("send_all: OKAY".encode())
+    def add_password_response(self, client_socket):
+        client_socket.sendall(self.server_dh.encrypt("send_all: OKAY", self.server_dh.iv))
         #self.add_password(self, an, u, p, url, notes)
-        response = client_socket.recv(1024)
-        parsed_data = json.loads(response.decode('utf-8'))
+        response = self.server_dh.decrypt(client_socket.recv(1024), self.server_dh.iv)
+        parsed_data = json.loads(response)#.decode('utf-8'))
         acc_name = parsed_data['acc_name']
         username = parsed_data['username']
         password = parsed_data['password']
