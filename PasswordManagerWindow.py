@@ -2,39 +2,7 @@ import tkinter as tk
 from client import *
 
 
-'''
-def window_init():
-    # ====== draw window ======
-    root=Tk()
-    root.title('Tkinter Window - Center')
-    window_width = 300
-    window_height = 200
-    root.geometry(f'{window_width}x{window_height}')
 
-   # ====== buttons ======
-    button = Button(root, text="Add Account", command=lambda : print("cool"))
-    button.pack(ipadx=5, ipady=5, expand=True)
-    #text entry box
-    #box_label = Label(root, text='tmp: ')
-    #box_label.pack(pady=2)
-    #hide pass
-    #entry = Entry(root, show='*')
-    #text_var = StringVar()
-    #entry = Entry(root, textvariable=text_var)
-    #entry.pack(pady=20)
-    #entry.focus()
-    #output text
-    #output_label = Label(root)
-    #output_label.pack()
-    #text_var.trace_add(
-    #    "write",
-    #    lambda *args: output_label.config(text=text_var.get().upper())
-    #)
-    #keyboard
-    #root.bind('<Return>', lambda event: test(event, text_var))
-
-    root.mainloop()
-'''
 LARGE_FONT= ("Verdana", 12)
 class PasswordManagerWindow(tk.Tk):
 
