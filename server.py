@@ -81,8 +81,10 @@ class PasswordManagerDB:
                         'other' : lambda : client_socket.sendall(response)
                     }
                     print(f"response: {response}")#.decode().strip()
-                    switch.get(response, lambda: print("unknown"))()
-                    client_socket.sendall(self.server_dh.encrypt(response, self.server_dh.iv))
+                    function_result = switch.get(response, lambda: "unknown")()
+                    self.send(client_socket, function_result)
+                    #client_socket.sendall(self.server_dh.encrypt(response, self.server_dh.iv))
+
 
     #RESPONSE FUNCTIONS
 
@@ -98,13 +100,14 @@ class PasswordManagerDB:
         url = parsed_data['url']
         notes = parsed_data['notes']
         self.add_password(acc_name, username, password, url, notes)
-        print(f"sarr: {response}")
+        return f"added: {response}"
         
     def search_password_response(self, client_socket):
         client_socket.sendall(self.server_dh.encrypt("search_password: OKAY", self.server_dh.iv))
         response = self.recv(client_socket)
         data = str(self.search_password(response))
-        self.send(client_socket, data)
+        return data
+        #self.send(client_socket, data)
 
     #DATABASE FUNCTIONS
     def add_password(self, account_name=None, username=None, password=None, url=None, notes=None):
