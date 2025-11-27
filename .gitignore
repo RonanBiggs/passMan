@@ -2,3 +2,4 @@ TODO
 .gitignore
 passwords.db
 .venv
+secret_key.txt

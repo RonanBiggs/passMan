@@ -1,6 +1,8 @@
-#TODO: implement handshake and database requests from gui
+import string
+import secrets
 import socket
 import json
+import os
 from diffieHellman import *
 
 class Client:
@@ -9,6 +11,20 @@ class Client:
         self.port = port
         self.socket = None
         self.client_dh = DiffieHellmanParty()
+
+        #get or create password key
+        filename = "secret_key.txt"
+        if not os.path.exists(filename):
+            with open(filename, 'w') as f:
+                secret = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(256))
+                self.encryption_key = secret
+                f.write(secret)
+        else:
+            with open(filename, 'r') as f:
+                self.encryption_key = f.read()
+
+
+
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.host, self.port))
@@ -56,10 +72,15 @@ class Client:
         self.send("add_password")
         response = self.recv()
         print(response)
+        plaintext_pass = password.get()
+        encrypted_pass = ""
+        for i, char in enumerate(plaintext_pass):
+            encrypted_char = chr(ord(char) ^ ord(self.encryption_key[i]))
+            encrypted_pass = encrypted_pass + encrypted_char
         data = {
             "acc_name" : acc_name.get(),
             "username" : username.get(),
-            "password" : password.get(),
+            "password" : encrypted_pass,
             "url"      : url.get(),
             "notes"    : notes.get()
         }

@@ -2,6 +2,8 @@ import sqlite3
 import json
 import socket
 from diffieHellman import *
+import secrets
+import string
 
 #TODO: Extending passwordManagerDB to also be the server
 #TODO: handle handshake and database requests
@@ -25,6 +27,7 @@ class PasswordManagerDB:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             account_name TEXT NOT NULL,
             username TEXT,
+            salt CHAR(16),
             password TEXT NOT NULL,
             url TEXT,
             notes TEXT,
@@ -96,6 +99,9 @@ class PasswordManagerDB:
         parsed_data = json.loads(response)#.decode('utf-8'))
         acc_name = parsed_data['acc_name']
         username = parsed_data['username']
+        #idk why i thought i could hash the passwords. doesn't really work.
+        #salt = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
+        #password = SHA256.new(data=(parsed_data['password'] + salt).encode('utf-8')).hexdigest()
         password = parsed_data['password']
         url = parsed_data['url']
         notes = parsed_data['notes']
