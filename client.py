@@ -1,3 +1,4 @@
+import ast
 import string
 import secrets
 import socket
@@ -11,6 +12,9 @@ class Client:
         self.port = port
         self.socket = None
         self.client_dh = DiffieHellmanParty()
+
+        # --- Search Result Vars ---
+        self.search_result = "[]"
 
         #get or create password key
         filename = "secret_key.txt"
@@ -96,7 +100,20 @@ class Client:
         print(response)
         self.send(acc_name)
         response = self.recv()
-        print(response)
+        #TODO: Serverside message for no account found instead of empty list maybe?
+        if response == "[]":
+            print("No Account Found")
+            return
+        parsed_data = list(ast.literal_eval(response)[0]) #parses the sql row into a python list. i.e. parsed_data[1] = username
+        #decrypt password
+        decrypted_pass = ""
+        for i, char in enumerate(parsed_data[3]):
+            decrypted_char = chr(ord(char) ^ ord(self.encryption_key[i]))
+            decrypted_pass = decrypted_pass + decrypted_char
+
+        parsed_data[3] = decrypted_pass
+        self.search_result = parsed_data
+        print(parsed_data)
 
     def exit(self):
         self.socket.close()

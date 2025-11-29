@@ -15,7 +15,7 @@ class PasswordManagerWindow(tk.Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
         self.frames = {}
-        for F in (StartPage, PageOne, PageTwo):
+        for F in (StartPage, PageOne, PageTwo, SearchResults):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -42,8 +42,7 @@ class StartPage(tk.Frame):
                             command=lambda: controller.show_frame(PageTwo))
         button2.pack()
 
-def test(event, text):
-    print(text.get())
+
 class PageOne(tk.Frame):
 
 
@@ -108,7 +107,6 @@ class PageOne(tk.Frame):
 
 
 class PageTwo(tk.Frame):
-
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         acc_name_txt = tk.StringVar()
@@ -116,7 +114,7 @@ class PageTwo(tk.Frame):
         button1 = tk.Button(self, text="Back",
                             command=lambda: controller.show_frame(StartPage))
         submit_button = tk.Button(self, text="Submit Entry",
-                                  command=lambda: controller.client.search_password(acc_name_txt.get()))
+                                  command=lambda: (controller.client.search_password(acc_name_txt.get()) or controller.show_frame(SearchResults)))
 
         acc_entry = tk.Entry(self, textvariable=acc_name_txt)
 
@@ -125,3 +123,45 @@ class PageTwo(tk.Frame):
         button1.grid(row=0, column=0)
         submit_button.grid(row=1,column=1)
         acc_entry.grid(row=1,column=2)
+
+
+class SearchResults(tk.Frame):
+    def __init__(self, parent, controller):
+        self.controller = controller
+        tk.Frame.__init__(self, parent)
+        win_label = tk.Label(self, text="Search Results", font=LARGE_FONT)
+        button1 = tk.Button(self, text="Back",
+                            command=lambda: controller.show_frame(StartPage))
+        win_label.grid(row=0, column=2)
+        button1.grid(row=0, column=0)
+
+        self.results_label = tk.Label(self, text="", font=LARGE_FONT)
+        self.username_label = tk.Label(self, text="", font=LARGE_FONT)
+        self.password_label = tk.Label(self, text="", font=LARGE_FONT)
+        self.notes_label = tk.Label(self, text="", font=LARGE_FONT)
+        self.url_label = tk.Label(self, text="", font=LARGE_FONT)
+
+        
+    def tkraise(self, aboveThis=None):
+        tk.Frame.tkraise(self, aboveThis)
+        self.update_page()
+    def update_page(self):
+        self.results_label.grid_forget()
+        self.username_label.grid_forget()
+        self.password_label.grid_forget()
+        self.notes_label.grid_forget()
+        self.url_label.grid_forget()
+        if self.controller.client.search_result == "[]" or "":
+            self.results_label.config(text="No Account Found")
+            self.results_label.grid(row=1, column=2)
+        else:
+            result = self.controller.client.search_result
+            self.username_label.config(text=f"Username: {result[2]}")
+            self.password_label.config(text=f"Password: {result[3]}")
+            self.notes_label.config(text=f"Notes: {result[4]}")
+            self.url_label.config(text=f"URL: {result[5]}")
+            self.username_label.grid(row=1, column=1)
+            self.password_label.grid(row=2, column=1)
+            self.notes_label.grid(row=3, column=1)
+            self.url_label.grid(row=4, column=1)
+            self.controller.client.search_result = "[]"

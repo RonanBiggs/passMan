@@ -27,7 +27,6 @@ class PasswordManagerDB:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             account_name TEXT NOT NULL,
             username TEXT,
-            salt CHAR(16),
             password TEXT NOT NULL,
             url TEXT,
             notes TEXT,
