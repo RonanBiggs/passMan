@@ -80,6 +80,7 @@ class PasswordManagerDB:
                     switch = {
                         'add_password' : lambda : self.add_password_response(client_socket),
                         'search_password' : lambda : self.search_password_response(client_socket),
+                        'delete_password' : lambda : self.delete_password_response(client_socket),
                         'other' : lambda : client_socket.sendall(response)
                     }
                     print(f"response: {response}")#.decode().strip()
@@ -114,8 +115,17 @@ class PasswordManagerDB:
         return data
         #self.send(client_socket, data)
 
+    def delete_password_response(self, client_socket):
+        self.send(client_socket, "delete_password: OKAY")
+        #acc name
+        response = self.recv(client_socket)
+        db_response = str(self.del_password(response))
+        print(db_response)
+        return db_response
+
     #DATABASE FUNCTIONS
     def add_password(self, account_name=None, username=None, password=None, url=None, notes=None):
+        #TODO: dont allow empty account_name or [] as acc name
         self.cur.execute("INSERT INTO passwords (account_name, username, password, url, notes) VALUES ('%s', '%s', '%s', '%s', '%s')"%(account_name, username, password, url, notes))
         self.con.commit()
 
@@ -153,8 +163,13 @@ class PasswordManagerDB:
 
     def del_password(self, account_name):
         sql = 'DELETE FROM passwords WHERE account_name = ?'
+        exists = str(self.search_password(account_name))
+        print(exists)
+        if exists == "[]":
+           return "No Account Found"
         self.cur.execute(sql, (account_name,))
         self.con.commit()
+        return "Success"
 
 if __name__ == "__main__":
     with PasswordManagerDB() as db:

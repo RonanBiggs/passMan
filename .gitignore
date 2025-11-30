@@ -3,3 +3,4 @@ TODO
 passwords.db
 .venv
 secret_key.txt
+__pycache__

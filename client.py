@@ -115,5 +115,13 @@ class Client:
         self.search_result = parsed_data
         print(parsed_data)
 
+    def delete_account(self, acc_name):
+        self.send("delete_password")
+        response = self.recv()
+        print(response)
+        self.send(acc_name)
+        response = self.recv()
+        print(response)
+
     def exit(self):
         self.socket.close()

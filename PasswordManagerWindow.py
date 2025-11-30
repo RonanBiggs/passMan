@@ -15,7 +15,7 @@ class PasswordManagerWindow(tk.Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
         self.frames = {}
-        for F in (StartPage, PageOne, PageTwo, SearchResults):
+        for F in (StartPage, PageOne, PageTwo, SearchResults, DeletePage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -41,6 +41,10 @@ class StartPage(tk.Frame):
         button2 = tk.Button(self, text="Lookup",
                             command=lambda: controller.show_frame(PageTwo))
         button2.pack()
+
+        delete_button = tk.Button(self, text="Delete Account",
+                            command=lambda: controller.show_frame(DeletePage))
+        delete_button.pack()
 
 
 class PageOne(tk.Frame):
@@ -165,3 +169,23 @@ class SearchResults(tk.Frame):
             self.notes_label.grid(row=3, column=1)
             self.url_label.grid(row=4, column=1)
             self.controller.client.search_result = "[]"
+
+
+
+class DeletePage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        acc_name_txt = tk.StringVar()
+        win_label = tk.Label(self, text="Delete an Account", font=LARGE_FONT)
+        button1 = tk.Button(self, text="Back",
+                            command=lambda: controller.show_frame(StartPage))
+        submit_button = tk.Button(self, text="Submit",
+                                  command=lambda: (controller.client.delete_account(acc_name_txt.get())))
+
+        acc_entry = tk.Entry(self, textvariable=acc_name_txt)
+
+
+        win_label.grid(row = 0, column = 2)
+        button1.grid(row=0, column=0)
+        submit_button.grid(row=1,column=1)
+        acc_entry.grid(row=1,column=2)
