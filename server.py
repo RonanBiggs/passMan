@@ -73,10 +73,11 @@ class PasswordManagerDB:
                 self.server_dh.get_aes_key()
                 client_socket.send(self.server_dh.encrypt("cipher text from server", self.server_dh.iv))
                 while True:
-                    response = self.server_dh.decrypt(client_socket.recv(1024), self.server_dh.iv)
+                    response = client_socket.recv(1024)
                     if not response:
                         print(f"client {addr} disconnected")
                         break
+                    response = self.server_dh.decrypt(response, self.server_dh.iv)
                     switch = {
                         'add_password' : lambda : self.add_password_response(client_socket),
                         'search_password' : lambda : self.search_password_response(client_socket),

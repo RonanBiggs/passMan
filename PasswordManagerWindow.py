@@ -10,6 +10,7 @@ class PasswordManagerWindow(tk.Tk):
         self.client = Client('localhost', 5432)
         self.client.connect()
         tk.Tk.__init__(self, *args, **kwargs)
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
@@ -26,6 +27,12 @@ class PasswordManagerWindow(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
 
+    def on_close(self):
+        try:
+            self.client.exit()
+        except:
+            pass
+        self.destroy()
 
 class StartPage(tk.Frame):
 
@@ -100,7 +107,6 @@ class PageOne(tk.Frame):
         url_label.grid(row = 6, column = 0)
         notes_label.grid(row = 7, column = 0)
         button1.grid(row = 0, column = 0)
-        #button2.grid(row=2, column=1)
         submit_button.grid(row=1, column=2)
         acc_entry.grid(row = 3, column = 1)
         user_entry.grid(row = 4, column = 1)

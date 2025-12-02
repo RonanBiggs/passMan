@@ -36,7 +36,7 @@ class Client:
         print(f"Server greeting: {greeting}")
         #initiate DH key exchange
 #        self.client_dh = DiffieHellmanParty()
-        #gen pub/priv key
+        #self.del_password(response)gen pub/priv key
         self.client_dh.gen_keys()
         #recieve server public key
         server_public_key =  self.socket.recv(1024) #public key
@@ -53,29 +53,29 @@ class Client:
         print(cipher_txt.split(b'\n')[0])
         print(self.client_dh.decrypt(cipher_txt, self.client_dh.iv))
 
-        #self.socket.send("client reply".encode() + b'\n')
-        #data = self.socket.recv(1024)
-        #print(data)
 
 
 
 #send an encrypted message to the server
     def send(self, data):
-       self.socket.send(self.client_dh.encrypt(data, self.client_dh.iv))
+        print(f"Unencrypted data to be send: {data}")
+        encrypted_data = self.client_dh.encrypt(data, self.client_dh.iv)
+        self.socket.send(encrypted_data)
+#        self.socket.send(self.client_dh.encrypt(data, self.client_dh.iv))
     def recv(self):
-        return self.client_dh.decrypt(self.socket.recv(1024), self.client_dh.iv)
+        #return self.client_dh.decrypt(self.socket.recv(1024), self.client_dh.iv)
+        response = self.socket.recv(1024)
+        decrypted_response = self.client_dh.decrypt(response, self.client_dh.iv)
+        print(f"Encrypted Server Response: {response}")
+        print(f"Decrypted Server Response: {decrypted_response}")
+        return decrypted_response
 
-#temporary test function
-    def send_hello(self, event, text):
-        self.socket.send(text.get().encode() + b'\n')
-        data = self.socket.recv(1024)
-        print(data)
+
 #submit all fields of data to server for sql storing
     def add_password(self, acc_name, username, password, url, notes):
 #        self.socket.send("add_password".encode() + b'\n')
         self.send("add_password")
         response = self.recv()
-        print(response)
         plaintext_pass = password.get()
         encrypted_pass = ""
         for i, char in enumerate(plaintext_pass):
@@ -88,16 +88,13 @@ class Client:
             "url"      : url.get(),
             "notes"    : notes.get()
         }
-        print(f"data: {data}")
-#        self.socket.send(json.dumps(data).encode() + b'\n')
+        #print(f"data: {data}")
         self.send(json.dumps(data))
-        response = self.socket.recv(1024)
-        print(response)
+        response = self.recv()
 #send account name, expect all data back.
     def search_password(self, acc_name):
         self.send("search_password")
         response = self.recv()
-        print(response)
         self.send(acc_name)
         response = self.recv()
         #TODO: Serverside message for no account found instead of empty list maybe?
@@ -113,15 +110,12 @@ class Client:
 
         parsed_data[3] = decrypted_pass
         self.search_result = parsed_data
-        print(parsed_data)
 
     def delete_account(self, acc_name):
         self.send("delete_password")
         response = self.recv()
-        print(response)
         self.send(acc_name)
         response = self.recv()
-        print(response)
 
     def exit(self):
         self.socket.close()
